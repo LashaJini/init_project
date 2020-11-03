@@ -1,10 +1,8 @@
 ## TODO
 
-- [x] add `DockerFile` for deno
-- [x] add docs
-- [x] add projects dir
-- [x] add tests + benches
-- [x] add README.md
+- [ ] new project: rust-deno
+- [ ] add examples in README.md
+- [ ] rust-api naming guidelines
 
 ## Never-Ending TODO
 
