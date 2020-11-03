@@ -131,11 +131,12 @@ impl Project {
             "public/index.html",
             "public/javascripts/script.js",
             "public/style/style.css",
-            "deps.ts",
+            "src/deps.ts",
+            "src/mod.ts",
+            "src/test_deps.ts",
             "DockerFile",
             "DrakeFile.ts",
             "lock.json",
-            "test_deps.ts",
         ];
 
         // create project root directory

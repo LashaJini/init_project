@@ -1,9 +1,9 @@
 ## TODO
 
-- [ ] add `DockerFile` for deno
+- [x] add `DockerFile` for deno
 - [ ] add docs
-- [ ] add projects dir
-- [ ] add tests + benches
+- [x] add projects dir
+- [x] add tests + benches
 - [x] add README.md
 
 ## Never-Ending TODO
