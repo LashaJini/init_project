@@ -3,8 +3,16 @@ name = "init_project"
 version = "0.1.1"
 authors = ["109149 <109149qwe@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = """
+init_project is a project generator executable.
+"""
+repository = "https://github.com/109149/init_project"
+readme = "README.md"
+keywords = ["generate", "project"]
+categories = ["command-line-utilities"]
+license = "MIT OR APACHE"
+# documentation = "https://github.com/109149/init_project"
+# homepage = "https://github.com/109149/init_project"
 
 [dependencies]
 clap = "2.0.0"
