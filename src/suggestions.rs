@@ -121,6 +121,8 @@ impl Project {
         let dirs = [
             "public/javascripts",
             "public/style",
+            "public/res/images",
+            "src",
             "tests",
             "routes",
             // format!("{}/public/javascripts", project_name),
@@ -137,6 +139,7 @@ impl Project {
             "DockerFile",
             "DrakeFile.ts",
             "lock.json",
+            "README.md",
         ];
 
         // create project root directory
