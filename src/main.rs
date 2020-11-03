@@ -4,7 +4,7 @@ use clap::{App, Arg};
 
 use init_project::{consts, suggestions};
 
-/// Get arguments
+/// Gets the arguments passed to executable
 pub fn args() -> clap::ArgMatches<'static> {
     let res = App::new("init_project")
         .version(consts::VERSION.unwrap_or("Uknown"))

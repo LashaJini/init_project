@@ -1,3 +1,7 @@
+//! Suggested Projects Module
+//!
+//! This module contains main functions for handling project creation.
+
 // #[macro_use]
 // use super::log;
 // use super::env_logger;
@@ -10,8 +14,13 @@ use std::io::{self, Write};
 use std::path::Path;
 use std::process::{self, Command};
 
+/// Type for function callbacks
+///
+/// This type is used as value for `HashMap`. Functions that return this type are
+/// project generators, which are *_handler functions.
 type Callback = fn() -> Result<process::ExitStatus, io::Error>;
 
+/// Contains all the necessary handler information
 #[allow(non_snake_case)]
 pub struct Project {
     AVAILABLE_PROJECTS: Vec<&'static str>,
@@ -22,6 +31,15 @@ pub struct Project {
 
 // public
 impl Project {
+    /// Creates the new instance of `Project` structure
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// let project = Project::new();
+    /// # }
+    /// ```
     pub fn new() -> Project {
         let num_of_projects = 4;
         let key = "";
@@ -39,6 +57,18 @@ impl Project {
         }
     }
 
+    /// Displays the projects to choose from
+    ///
+    /// Returns the instance of `Project`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// let project = Project::new();
+    /// project.display();
+    /// # }
+    /// ```
     // TODO: logging
     pub fn display(self) -> Project {
         // env_logger::init();
@@ -61,6 +91,18 @@ impl Project {
         self
     }
 
+    /// Prompts the user to choose from the available projects
+    ///
+    /// Sets key to which project the user has chosen. Returns the instance of the `Project`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// let project = Project::new();
+    /// project.display().choose();
+    /// # }
+    /// ```
     pub fn choose(mut self) -> Project {
         let key: &str = loop {
             io::stdout().write_all(b" >> ").unwrap();
@@ -87,6 +129,18 @@ impl Project {
         self
     }
 
+    /// Generate project
+    ///
+    /// Generates user chosen project.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// let project = Project::new();
+    /// project.display().choose().generate_project();
+    /// # }
+    /// ```
     pub fn generate_project(self) {
         let functions: HashMap<&str, &Callback> = self
             .AVAILABLE_PROJECTS
@@ -100,6 +154,7 @@ impl Project {
 
 // private
 impl Project {
+    /// dis too?
     fn rust_wasm_handler() -> Result<process::ExitStatus, io::Error> {
         // cargo generate --git https://github.com/rustwasm/wasm-pack-template
         if let Ok(mut child) = Command::new("cargo")
@@ -122,9 +177,8 @@ impl Project {
             "public/javascripts",
             "public/style",
             "public/res/images",
-            "src",
+            "src/routes",
             "tests",
-            "routes",
             // format!("{}/public/javascripts", project_name),
             // format!("{}/public/style", project_name),
         ];
@@ -166,7 +220,7 @@ impl Project {
         let data = Project::echo_drakefile_ts();
         fs::write(drakefile_ts_path, data).expect("Unable to write to DrakeFile.ts file");
 
-        let deps_ts_path = path.join("deps.ts");
+        let deps_ts_path = path.join("src").join("deps.ts");
         let data = Project::echo_deps_ts();
         fs::write(deps_ts_path, data).expect("Unable to write to deps.ts file");
 
@@ -179,7 +233,7 @@ impl Project {
     }
 
     fn echo_drakefile_ts() -> String {
-        "import { desc, task, sh, run } from \"./deps.ts\";
+        "import { desc, task, sh, run } from \"./src/deps.ts\";
 
 desc(\"start app\");
 task(\"start\", [], async function () {
