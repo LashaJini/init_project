@@ -132,6 +132,7 @@ impl Project {
             "public/javascripts/script.js",
             "public/style/style.css",
             "deps.ts",
+            "DockerFile",
             "DrakeFile.ts",
             "lock.json",
             "test_deps.ts",
