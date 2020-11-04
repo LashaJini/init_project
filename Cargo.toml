@@ -10,7 +10,7 @@ repository = "https://github.com/109149/init_project"
 readme = "README.md"
 keywords = ["generate", "project"]
 categories = ["command-line-utilities"]
-license = "MIT OR APACHE"
+license = "MIT"
 # documentation = "https://github.com/109149/init_project"
 # homepage = "https://github.com/109149/init_project"
 
