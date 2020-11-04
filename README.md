@@ -1,6 +1,14 @@
 init_project
 ------------
-init_project is a project generator executable.
+init_project is a project generator.
+
+## Quickstart
+
+```bash
+init_project -g
+
+# And follow instructions.
+```
 
 ### TODO
 
