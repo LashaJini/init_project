@@ -173,24 +173,15 @@ impl Project {
     fn init_git_inside(project_name: String) {
         let mut cmd = Command::new("git");
         cmd.current_dir(fs::canonicalize(&project_name).unwrap());
-        match cmd.arg("init").spawn() {
-            Ok(_) => (),
-            Err(_) => {
-                eprintln!("Could not initialize Git inside {}", &project_name);
-                eprintln!("Exiting...");
-                process::exit(1);
+        if let Ok(mut child) = cmd.arg("init").spawn() {
+            // is dis good? :/
+            match child.wait() {
+                _ => (),
             }
-        }
-
-        let mut cmd = Command::new("touch");
-        cmd.current_dir(fs::canonicalize(&project_name).unwrap());
-        match cmd.arg(".gitignore").spawn() {
-            Ok(_) => (),
-            Err(_) => {
-                eprintln!("Could not create file .gitignore inside {}", &project_name);
-                eprintln!("Exiting...");
-                process::exit(1);
-            }
+        } else {
+            eprintln!(" [!!!] Could not initialize Git inside {}", &project_name);
+            eprintln!(" [!!] Exiting...");
+            process::exit(1);
         }
     }
 
@@ -228,7 +219,10 @@ impl Project {
             "src/deps.ts",
             "src/mod.ts",
             "src/test_deps.ts",
-            "DockerFile",
+            ".env",
+            ".gitignore",
+            "Dockerfile",
+            "docker-compose.yml",
             "DrakeFile.ts",
             "lock.json",
             "README.md",
@@ -266,8 +260,43 @@ impl Project {
         let data = Project::echo_index_html();
         fs::write(index_html_path, data).expect("Unable to write to public/index.html file");
 
+        let dot_env_path = path.join(".env");
+        let data = Project::echo_dot_env();
+        fs::write(dot_env_path, data).expect("Unable to write to .env file");
+
+        let docker_compose_yml = path.join("docker-compose.yml");
+        let data = Project::echo_docker_compose_yml(project_name.to_string());
+        fs::write(docker_compose_yml, data).expect("Unable to write to docker-compose.yml file");
+
         // this is bad; executing touch cmd again just to get te return type correctly
         cmd.status()
+    }
+
+    fn echo_docker_compose_yml(project_name: String) -> String {
+        format!(
+            "version: '3'
+services:
+  api:
+    container_name: {project_name}
+    # image: hayd/deno:alpine-1.5.0
+    environment:
+      - SHELL=/bin/sh
+    command: run --allow-all DrakeFile.ts start
+    env_file: .env
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      # - \"8000:8000\"
+     - \"${{PORT}}:${{PORT}}\"
+    restart: always",
+            project_name = project_name
+        )
+        .to_string()
+    }
+
+    fn echo_dot_env() -> String {
+        "PORT=8000".to_string()
     }
 
     fn echo_drakefile_ts() -> String {
@@ -275,9 +304,9 @@ impl Project {
 
 desc(\"start app\");
 task(\"start\", [], async function () {
-  // Add permissions
+  // Add additional permissions
   await sh(
-    \"deno run mod.ts\",
+    \"deno run src/mod.ts\",
   );
 });
 
@@ -291,6 +320,7 @@ export * as log from \"https://deno.land/std/log/mod.ts\";
 
 // Third party dependencies
 export { desc, task, sh, run } from \"https://deno.land/x/drake/mod.ts\";
+export { config } from \"https://deno.land/x/dotenv/mod.ts\";
 "
         .to_string()
     }
