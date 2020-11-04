@@ -18,15 +18,16 @@ use std::process::{self, Command};
 ///
 /// This type is used as value for `HashMap`. Functions that return this type are
 /// project generators, which are *_handler functions.
-type Callback = fn() -> Result<process::ExitStatus, io::Error>;
+type Callback = fn(project: &mut Project) -> Result<process::ExitStatus, io::Error>;
 
 /// Contains all the necessary handler information
 #[allow(non_snake_case)]
 pub struct Project {
     AVAILABLE_PROJECTS: Vec<&'static str>,
-    CALLBACKS: Vec<Callback>,
     num_of_projects: usize,
+    functions: HashMap<&'static str, Callback>,
     key: &'static str,
+    project_name: String,
 }
 
 // public
@@ -40,20 +41,31 @@ impl Project {
     /// let project = Project::new();
     /// # }
     /// ```
+    #[allow(non_snake_case)]
     pub fn new() -> Project {
         let num_of_projects = 4;
         let key = "";
+        let project_name = String::from("");
+
+        let AVAILABLE_PROJECTS: Vec<&str> = vec!["deno", "rust-wasm", "cargo-bin", "cargo-lib"];
+        let CALLBACKS: Vec<Callback> = vec![
+            Project::deno_handler,
+            Project::rust_wasm_handler,
+            Project::cargo_bin_handler,
+            Project::cargo_lib_handler,
+        ];
+
+        let functions: HashMap<&str, Callback> = AVAILABLE_PROJECTS
+            .into_iter()
+            .zip(CALLBACKS.into_iter())
+            .collect();
 
         Project {
-            AVAILABLE_PROJECTS: vec!["deno", "rust-wasm", "cargo-bin", "cargo-lib"],
-            CALLBACKS: vec![
-                Project::deno_handler,
-                Project::rust_wasm_handler,
-                Project::cargo_bin_handler,
-                Project::cargo_lib_handler,
-            ],
+            AVAILABLE_PROJECTS: vec!["deno", "rust-wasm", "cargo-bin", "cargo-lib"], // O_O
             num_of_projects,
+            functions,
             key,
+            project_name,
         }
     }
 
@@ -141,21 +153,48 @@ impl Project {
     /// project.display().choose().generate_project();
     /// # }
     /// ```
-    pub fn generate_project(self) {
-        let functions: HashMap<&str, &Callback> = self
-            .AVAILABLE_PROJECTS
-            .into_iter()
-            .zip(self.CALLBACKS.iter())
-            .collect();
-
-        let _ = functions.get(self.key).unwrap()();
+    pub fn generate_project(&mut self) {
+        let _ = self.functions.get(self.key).unwrap()(self);
+        Project::init_git_inside(self.get_project_name());
     }
 }
 
 // private
 impl Project {
-    /// dis too?
-    fn rust_wasm_handler() -> Result<process::ExitStatus, io::Error> {
+    fn set_project_name(&mut self, project_name: String) {
+        self.project_name = project_name;
+    }
+
+    fn get_project_name(&self) -> String {
+        let result = &self.project_name;
+        result.to_string()
+    }
+
+    fn init_git_inside(project_name: String) {
+        let mut cmd = Command::new("git");
+        cmd.current_dir(fs::canonicalize(&project_name).unwrap());
+        match cmd.arg("init").spawn() {
+            Ok(_) => (),
+            Err(_) => {
+                eprintln!("Could not initialize Git inside {}", &project_name);
+                eprintln!("Exiting...");
+                process::exit(1);
+            }
+        }
+
+        let mut cmd = Command::new("touch");
+        cmd.current_dir(fs::canonicalize(&project_name).unwrap());
+        match cmd.arg(".gitignore").spawn() {
+            Ok(_) => (),
+            Err(_) => {
+                eprintln!("Could not create file .gitignore inside {}", &project_name);
+                eprintln!("Exiting...");
+                process::exit(1);
+            }
+        }
+    }
+
+    fn rust_wasm_handler(_project: &mut Project) -> Result<process::ExitStatus, io::Error> {
         // cargo generate --git https://github.com/rustwasm/wasm-pack-template
         if let Ok(mut child) = Command::new("cargo")
             .arg("generate")
@@ -170,8 +209,9 @@ impl Project {
         }
     }
 
-    fn deno_handler() -> Result<process::ExitStatus, io::Error> {
+    fn deno_handler(project: &mut Project) -> Result<process::ExitStatus, io::Error> {
         let project_name = &Project::read_project_name();
+        project.set_project_name(project_name.to_string());
 
         let dirs = [
             "public/javascripts",
@@ -179,8 +219,6 @@ impl Project {
             "public/res/images",
             "src/routes",
             "tests",
-            // format!("{}/public/javascripts", project_name),
-            // format!("{}/public/style", project_name),
         ];
 
         let files = [
@@ -274,15 +312,17 @@ export { desc, task, sh, run } from \"https://deno.land/x/drake/mod.ts\";
         .to_string()
     }
 
-    fn cargo_bin_handler() -> Result<process::ExitStatus, io::Error> {
+    fn cargo_bin_handler(project: &mut Project) -> Result<process::ExitStatus, io::Error> {
         let project_name = &Project::read_project_name();
+        project.set_project_name(project_name.to_string());
 
         let flag = "--bin";
         Project::cargo_handler(flag, project_name)
     }
 
-    fn cargo_lib_handler() -> Result<process::ExitStatus, io::Error> {
+    fn cargo_lib_handler(project: &mut Project) -> Result<process::ExitStatus, io::Error> {
         let project_name = &Project::read_project_name();
+        project.set_project_name(project_name.to_string());
 
         let flag = "--lib";
         Project::cargo_handler(flag, project_name)
