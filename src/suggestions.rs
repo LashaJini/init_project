@@ -43,16 +43,23 @@ impl Project {
     /// ```
     #[allow(non_snake_case)]
     pub fn new() -> Project {
-        let num_of_projects = 4;
+        let num_of_projects = 5;
         let key = "";
         let project_name = String::from("");
 
-        let AVAILABLE_PROJECTS: Vec<&str> = vec!["deno", "rust-wasm", "cargo-bin", "cargo-lib"];
+        let AVAILABLE_PROJECTS: Vec<&str> = vec![
+            "deno",
+            "rust-wasm",
+            "cargo-bin",
+            "cargo-lib",
+            "create-react-app",
+        ];
         let CALLBACKS: Vec<Callback> = vec![
             Project::deno_handler,
             Project::rust_wasm_handler,
             Project::cargo_bin_handler,
             Project::cargo_lib_handler,
+            Project::create_react_app_handler,
         ];
 
         let functions: HashMap<&str, Callback> = AVAILABLE_PROJECTS
@@ -61,7 +68,13 @@ impl Project {
             .collect();
 
         Project {
-            AVAILABLE_PROJECTS: vec!["deno", "rust-wasm", "cargo-bin", "cargo-lib"], // O_O
+            AVAILABLE_PROJECTS: vec![
+                "deno",
+                "rust-wasm",
+                "cargo-bin",
+                "cargo-lib",
+                "create-react-app",
+            ], // O_O
             num_of_projects,
             functions,
             key,
@@ -196,6 +209,21 @@ impl Project {
             child.wait()
         } else {
             eprintln!(" [!!!] Could not generate rust-wasm");
+            process::exit(1);
+        }
+    }
+
+    fn create_react_app_handler(project: &mut Project) -> Result<process::ExitStatus, io::Error> {
+        let project_name = &Project::read_project_name();
+        project.set_project_name(project_name.to_string());
+
+        if let Ok(mut child) = Command::new("create-react-app")
+            .arg(project.get_project_name())
+            .spawn()
+        {
+            child.wait()
+        } else {
+            eprintln!(" [!!!] Could not create-react-app");
             process::exit(1);
         }
     }

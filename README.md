@@ -1,6 +1,14 @@
-init_project
-------------
+## init_project
+
 init_project is a project generator.
+
+## Available Projects
+
+- deno
+- rust-wasm
+- cargo-bin
+- cargo-lib
+- create-react-app
 
 ## Quickstart
 

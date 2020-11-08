@@ -1,18 +1,19 @@
 [package]
 name = "init_project"
-version = "0.1.1"
+version = "0.1.3"
 authors = ["109149 <109149qwe@gmail.com>"]
 edition = "2018"
 description = """
-init_project is a project generator executable.
+init_project is a project generator.
 """
 repository = "https://github.com/109149/init_project"
 readme = "README.md"
 keywords = ["generate", "project"]
 categories = ["command-line-utilities"]
 license = "MIT"
-# documentation = "https://github.com/109149/init_project"
-# homepage = "https://github.com/109149/init_project"
+
+# documentation = "https://docs.rs/init_project/*/init_project/"
+homepage = "https://github.com/109149/init_project"
 
 [dependencies]
 clap = "2.0.0"
