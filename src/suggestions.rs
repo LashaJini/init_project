@@ -43,7 +43,7 @@ impl Project {
     /// ```
     #[allow(non_snake_case)]
     pub fn new() -> Project {
-        let num_of_projects = 5;
+        let num_of_projects = 6;
         let key = "";
         let project_name = String::from("");
 
@@ -53,6 +53,7 @@ impl Project {
             "cargo-bin",
             "cargo-lib",
             "create-react-app",
+            "create-react-app template=typescript",
         ];
         let CALLBACKS: Vec<Callback> = vec![
             Project::deno_handler,
@@ -60,6 +61,7 @@ impl Project {
             Project::cargo_bin_handler,
             Project::cargo_lib_handler,
             Project::create_react_app_handler,
+            Project::create_react_app_typescript_handler,
         ];
 
         let functions: HashMap<&str, Callback> = AVAILABLE_PROJECTS
@@ -74,6 +76,7 @@ impl Project {
                 "cargo-bin",
                 "cargo-lib",
                 "create-react-app",
+                "create-react-app template=typescript",
             ], // O_O
             num_of_projects,
             functions,
@@ -209,6 +212,31 @@ impl Project {
             child.wait()
         } else {
             eprintln!(" [!!!] Could not generate rust-wasm");
+            process::exit(1);
+        }
+    }
+
+    fn create_react_app_typescript_handler(
+        project: &mut Project,
+    ) -> Result<process::ExitStatus, io::Error> {
+        let project_name = &Project::read_project_name();
+        project.set_project_name(project_name.to_string());
+
+        let project_name = project.get_project_name();
+
+        // TODO: add npm modules
+        // TODO: add .env
+        // TODO: update setupTests.ts
+        if let Ok(mut child) = Command::new("npx")
+            .arg("create-react-app")
+            .arg(project_name)
+            .arg("--template")
+            .arg("typescript")
+            .spawn()
+        {
+            child.wait()
+        } else {
+            eprintln!(" [!!!] Could not create-react-app");
             process::exit(1);
         }
     }
